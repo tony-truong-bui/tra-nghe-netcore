@@ -1,0 +1,263 @@
+﻿@model TraNgheCore.Models.ProductModel
+
+@{
+    Layout = "_Layout";
+    ViewBag.Title = "Add New Product";
+
+    // Retrieve the list of products from ViewBag and cast it to the correct type
+    var products = ViewBag.Products as List<TraNgheCore.Models.ProductModel>;
+
+}
+<h2>Add New Product</h2>
+
+@*Begin a form that posts to the current action (by default, POST to Product/Create)*@
+@using (Html.BeginForm(null,null,FormMethod.Post, new {enctype ="multipart/form-data"}))
+{
+    // Adds an anti-forgery token for CSRF protection
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+
+        @*Display a summary of validation errors, if any, styled as text-danger *@
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        @*// --- Product Name Field ---*@
+        <div class="form-group">
+
+            @*// Label for the Name property, styled with Bootstrap column classes    *@
+            @Html.LabelFor(m => m.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @*Textbox for entering the product name, styled as a Bootstrap form control*@
+                @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+                
+
+                @*Validation message for the Name property, styled as text-danger*@
+                @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Description, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Description, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Description, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <!--<div class="form-group">-->
+            @*@Html.LabelFor(m => m.ImageUrl, htmlAttributes: new { @class = "control-label col-md-2" })*@
+            <!--<div class="col-md-10">-->
+                @*@Html.TextBoxFor(m => m.ImageUrl, new { @class = "form-control" })*@
+                <!--<input type="file" name="ImageFile" class="form-control" accept="image/*" />-->
+                @*@Html.ValidationMessageFor(m => m.ImageUrl, "", new { @class = "text-danger" })*@
+            <!--</div>
+        </div>-->
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Price, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.TextBoxFor(m => m.Price, new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.Price, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @*@Html.LabelFor(m => m.IsServed, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.DropDownListFor(m => m.IsServed, new List<SelectListItem>
+            {
+                new SelectListItem { Text = "Yes", Value = "true" },
+                new SelectListItem { Text = "No", Value = "false" }
+            }, new { @class = "form-select" })
+            @Html.ValidationMessageFor(m => m.IsServed, "", new { @class = "text-danger" })
+        </div>*@
+
+            <div class="col-md-offset-2 col-md-10">
+                <div class="checkbox">
+                    <label>
+                        @Html.CheckBoxFor(m => m.IsServed) Is Served
+                    </label>
+                </div>
+                @Html.ValidationMessageFor(m => m.IsServed, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(m => m.Category, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.DropDownListFor(m => m.Category, (SelectList)ViewBag.CategoryList, "--Select Category--", new
+           {
+               @class = "form-select"
+
+           })
+                @Html.ValidationMessageFor(m => m.Category, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Add Product" class="btn btn-primary" />
+            </div>
+        </div>
+
+
+    </div>
+}
+
+
+@*Check if the products list is not null and contains any items*@
+@if (products != null && products.Any())
+{
+    <h3>Latest Products</h3>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Category</th>
+                <th>Is Served</th>
+            </tr>
+        </thead>
+        <tbody>
+            @*Loop through array of products*@
+            @foreach (var product in products)
+            {
+                <tr class="product-row-@product.Id">
+                    <td>
+                        <input id="name-input-@product.Id" type="text" value="@product.Name" class="form-control" />
+                    </td>
+                    <td>
+                        <input id="description-input-@product.Id" type="text" value="@product.Description" class="form-control" />
+                    </td>
+                    <td>
+                        <input id="price-input-@product.Id" type="text" value="@product.Price" class="form-control" />
+                    </td>
+                    <td>
+                        <select id="category-input-@product.Id" class="form-select">
+                            @foreach (var cat in (IEnumerable<TraNgheCore.Models.CategoryModel>)ViewBag.Categories)
+                            {
+                                <option value="@cat.Id" @(cat.Id == product.Category ? "selected" : "")>@cat.Name</option>
+                            }
+                        </select>
+                    </td>
+
+                    <td style="text-align:center;">
+                        @*<select id="isserved-input-@product.Id" class="form-select">
+                            <option value="true" @(product.IsServed ? "selected" : "")>Yes</option>
+                            <option value="false" @(!product.IsServed ? "selected" : "")>No</option>
+                        </select>*@
+
+                        <input type="checkbox" id="isserved-input-@product.Id" @(product.IsServed ? "checked" : "") />
+
+                    </td>
+
+                    <td>
+                        <button class="btn btn-success btn-sm update-produc"
+                                data-id="@product.Id"
+                                type="button">
+                            Update
+                        </button>
+                        |
+
+                        @*@Html.ActionLink("Delete", "Delete", new { id = category.Id }, new { onclick = "return confirm('Are you sure you want to delete this category?');" })*@
+
+                        <button class="btn btn-danger btn-sm delete-product"
+                                data-id="@product.Id"
+                                type="button">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No products found.</p>
+}
+
+
+@section scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            $('.delete-product').click(function () {
+                var id = $(this).data('id');
+                if (confirm('Are you sure you want to delete this product?')) {
+                    $.ajax({
+                        url: '@Url.Action("AjaxDelete", "Product")',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (result) {
+                            if (result.success) {
+                                $('.item-row-' + id).remove();
+                                alert('Product deleted successfully.');
+                                $('#product-row-' + id).fadeOut(300, function () { $(this).remove(); });
+                            } else {
+                                alert('Error deleting product: ' + result.message);
+                            }
+                        },
+                        error: function () {
+                            alert('An error occurred while deleting the product.');
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+
+    <script>
+        $(function () {
+            $('.update-product').click(function () {
+                var id = $(this).data('id');
+                var name = $('#name-input-' + id).val();
+                var description = $('#description-input-' + id).val();
+                var price = int.Parse($('#price-input-' + id).val());
+                var isServed = $('#isserved-input-' + id).is(':checked');
+                var category = $('#category-input-' + id).val();
+
+                if (trim(name) === "" || trim(description) === "" || isNaN(price)) {
+                    alert('Please fill in all fields correctly.');
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("AjaxUpdate", "Product")',
+                    type: 'POST',
+                    data: {
+                        id: id,
+                        name: name,
+                        description: description,
+                        price: price,
+                        isServed: isServed,
+                        category:category,
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            alert('Product updated successfully.');
+                            // Optionally, you can update the UI with the new values
+                            $('.product-row-' + id + ' td:nth-child(1)').text(name);
+                            $('.product-row-' + id + ' td:nth-child(2)').text(description);
+                            $('.product-row-' + id + ' td:nth-child(3)').text(price);
+                            $('.product-row-' + id + ' td:nth-child(4) select').val(category);
+                            $('.product-row-' + id + ' td:nth-child(5)').text(isServed ? "Yes" : "No");
+                        } else {
+                            alert('Error updating product: ' + result.message);
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while updating the product.');
+                    }
+                });
+
+                alert('Update functionality for product ID ' + id + ' is not implemented yet.');
+            });
+
+        });
+    </script>
+
+}

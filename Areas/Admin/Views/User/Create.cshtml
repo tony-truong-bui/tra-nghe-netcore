@@ -1,0 +1,249 @@
+﻿@model TraNgheCore.Models.UserListViewModel
+
+@{
+    ViewBag.Title = "Create";
+    Layout = "_Layout";
+    var AllRoles = (ViewBag.Roles as SelectList)?.Select(x => x.Text).ToList();
+}
+
+
+<h2>Create User Account</h2>
+@foreach (var r in AllRoles)
+{
+    <h2>@r</h2>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="form-group">
+        @Html.LabelFor(m => m.CreateUser.Email)
+        @Html.TextBoxFor(m => m.CreateUser.Email, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.CreateUser.Email)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.CreateUser.Password)
+        @Html.PasswordFor(m => m.CreateUser.Password, new { @class = "form-control" })
+        @Html.ValidationMessageFor(m => m.CreateUser.Password)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.CreateUser.Role)
+        @*@Html.ListBoxFor(m => m.CreateUser.Role, (SelectList)ViewBag.Roles, new { @class = "form-control" })*@
+
+        <div class="multi-select-dropdown" id="roleDropdown1">
+            <!-- Dropdown Button -->
+            <button type="button" class="dropdown-btn">
+                <span id="selectedText" class="selected-text">Select Roles...</span>
+                <i class="arrow-down">▼</i>
+            </button>
+
+            <!-- Dropdown Content -->
+            <div class="dropdown-content" id="dropdownContent1">
+                @foreach (var role in AllRoles)
+                {
+                    <div class="checkbox-item" data-role="@role">
+                        <label>
+                            <input type="checkbox" name="CreateUser.Role" value="@(role as string)" @(Model.CreateUser.Role != null && Model.CreateUser.Role.Contains(role) ? "checked" : "") onchange="updateSelection()" />
+
+                            <span class="checkmark"></span>
+                            <div class="role-info">
+                                <span class="role-name">@(role as string)</span>
+                            </div>
+                        </label>
+                    </div>
+                    @*@Html.ValidationMessageFor(m => m.CreateUser.Role)*@
+                }
+            </div>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Create User</button>
+}
+
+@if (Model.Users != null && Model.Users.Any())
+{
+    <h3>List of Users</h3>
+    <table>
+        <thead>
+            <tr>
+                <td>Id</td>
+                <th>Email</th>
+                <td>UserName</td>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var user in Model.Users)
+            {
+                <tr class="user-row-@user.Id">
+                    <td>@user.Id</td>
+                    <td>
+                        <input id="email-input-@user.Id" value="@user.Email" class="form-control" type="text" />
+                    </td>
+                    <td>
+                        <input id="username-input-@user.Id" value="@user.UserName" class="form-control" type="text" />
+                    </td>
+                    <td>
+                        @*<select multiple="multiple" id="role-input-@user.Id" class="form-select">
+                                @foreach (var role in AllRoles)
+                                {
+                                    <option value="@(role as string)" @(user.Roles.Contains(role as string) ? "selected" : "")>@(role as string)</option>
+                                }
+                            </select>*@
+
+                        <div class="multi-select-dropdown" id="roleDropdown">
+                            <!-- Dropdown Button -->
+                            <button type="button" class="dropdown-btn">
+                                <span id="selectedText" class="selected-text">Select Roles...</span>
+                                <i class="arrow-down">▼</i>
+                            </button>
+
+                            <!-- Dropdown Content -->
+                            <div class="dropdown-content" id="dropdownContent">
+                                @foreach (var role in AllRoles)
+                                {
+                                    <div class="checkbox-item" data-role="@role">
+                                        <label>
+                                            <input type="checkbox" name="CreateUser.Role" value="@(role as string)" @(user.Roles.Contains(role as string) ? "checked" : "") onchange="updateSelection()" />
+                                            <span class="checkmark"></span>
+                                            <div class="role-info">
+                                                <span class="role-name">@(role as string)</span>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                }
+                            </div>
+                        </div>
+
+                    </td>
+                    <td>
+                        <button class="btn btn-danger btn-sm delete-user" data-id="@user.Id">Delete</button>
+                        <button class="btn btn-primary btn-sm edit-user" data-id="@user.Id">Update</button>
+                    </td>
+                </tr>
+            }
+    </table>
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            $('.delete-user').on('click', function () {
+                var id = $(this).data('id');
+                if (confirm('Are you sure you want to delete this user?')) {
+                    $.post('/Admin/User/AjaxDelete', { id: userId }, function (response) {
+                        if (response.success) {
+                            $('#user-row-' + id).fadeOut(300, function () { $(this).remove(); });
+                        } else {
+                            alert(response.message || 'Delete failed.');
+                        }
+                    });
+                } else {
+                    return false; // Prevent default action if user cancels
+                }
+
+            });
+
+        });
+    </script>
+
+    <script>
+        $(function () {
+            $('.edit-user').on('click', function () {
+                var id = $(this).data('id');
+                var newEmail = $('#email-input-' + id).val();
+                var newUserName = $('#username-input-' + id).val();
+                var newRole = $('#role-input-' + id).val();
+                if (confirm('Are you sure you want to edit this user?')) {
+                    $.post('/Admin/User/AjaxUpdate', {
+                        id: userId,
+                        email: newEmail,
+                        userName: newUserName,
+                        role: newRole
+                    }, function (response) {
+                        if (response.success) {
+                            alert('User updated successfully.');
+                        } else {
+                            alert(response.message);
+                        }
+                    });
+                } else {
+                    return false; // Prevent default action if user cancels
+                }
+            });
+
+        });
+    </script>
+    <script>
+
+
+        // Toggle dropdown open/close
+        // Attach a click event handler to all elements with the class 'dropdown-btn', even if they are added dynamically
+        $(document).on('click', '.dropdown-btn', function (e) {
+            // Prevent the click event from bubbling up to parent elements (so it doesn't trigger document click handlers)
+            e.stopPropagation();
+
+            // Find the closest parent with the class 'multi-select-dropdown' (the container for this dropdown)
+            var $dropdown = $(this).closest('.multi-select-dropdown');
+
+            // Close (remove 'show' class from) all other dropdowns except the one that was clicked
+            $('.multi-select-dropdown .dropdown-content').not($dropdown.find('.dropdown-content')).removeClass('show');
+
+            // Toggle the 'show' class on the dropdown-content inside the clicked dropdown (open/close this dropdown)
+            $dropdown.find('.dropdown-content').toggleClass('show');
+        });
+
+
+    </script>
+    <script>
+
+        ////Close dropdown if click outside
+
+        //$(document).on('click', function (event) {
+        //    const $dropdown = $('.multi-select-dropdown');
+        //    if (!$dropdown.is(event.target) && $dropdown.has(event.target).length === 0 && isDropdownOpen) {
+        //        toggleDropdown();
+        //    }
+        //});
+
+
+        // When the user clicks anywhere on the document (outside any dropdown)
+        $(document).on('click', function () {
+            // Close all dropdowns by removing the 'show' class from every dropdown-content
+            $('.multi-select-dropdown .dropdown-content').removeClass('show');
+        });
+
+
+        // When any checkbox inside a multi-select-dropdown is changed (checked/unchecked)
+        $(document).on('change', '.multi-select-dropdown input[type="checkbox"]', function () {
+            // Find the closest dropdown container for the changed checkbox
+            var $dropdown = $(this).closest('.multi-select-dropdown');
+            var selected = [];
+
+            // Collect the values of all checked checkboxes in this dropdown
+            $dropdown.find('input[type="checkbox"]:checked').each(function () {
+                selected.push($(this).val());
+            });
+
+            // Update the text in the dropdown button to show selected roles, or default if none
+            $dropdown.find('.selected-text').text(selected.length ? selected.join(', ') : 'Select Roles...');
+            // Highlight selected items visually
+            $dropdown.find('.checkbox-item').each(function () {
+                var $checkbox = $(this).find('input[type="checkbox"]');
+
+                // Add 'selected' class if checked, remove if not
+                $(this).toggleClass('selected', $checkbox.prop('checked'));
+            });
+        });
+
+        
+    </script>
+
+}

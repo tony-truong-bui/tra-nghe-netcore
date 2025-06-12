@@ -1,0 +1,344 @@
+﻿@model TraNgheCore.Models.MultiOrderCreateViewModel
+@{
+    ViewBag.Title = "Create Orders";
+    Layout = "_Layout";
+
+}
+
+<h2>Create New Orders</h2>
+
+
+@Html.AntiForgeryToken()
+<div class="order-tabs-container">
+    @* 🗂️ TAB NAVIGATION: Bootstrap tabs for multiple orders *@
+    <ul class="nav nav-tabs" id="orderTabs">
+        @for (int i = 0; i < Model.Orders.Count; i++)
+        {
+            <li class="@(i == 0 ? "active" : "")">
+                @* 📌 First tab is active by default *@
+                <a href="#orderTab@i" data-toggle="tab">
+                    Order @(i + 1)          @* 👥 User-friendly numbering (1, 2, 3...) *@
+                    @* ❌ Close button for each tab (except can't close if only one) *@
+                    <button type="button" class="close remove-order-tab" data-index="@i" style="margin-left:5px;">&times;</button>
+                </a>
+            </li>
+        }
+    </ul>
+
+    @* 📋 TAB CONTENT: Each tab contains a complete order form *@
+    <div class="tab-content" id="orderTabContent">
+        @for (int i = 0; i < Model.Orders.Count; i++)
+        {
+            <div class="tab-pane @(i == 0 ? "active" : "")" id="orderTab@i">
+
+                @* 🔧 PARTIAL VIEW: Reuses single order form with unique field prefixes *@
+                @* CRITICAL: HtmlFieldPrefix makes form fields like Orders[0].CustomerName, Orders[1].CustomerName *@
+
+                @* 🔧 PARTIAL VIEW: Use <partial> Tag Helper with correct ViewData for field prefix *@
+                <partial name="_CreateOrderForm"
+                         model="Model.Orders[i]"
+                         view-data="new ViewDataDictionary(ViewData) { TemplateInfo = new Microsoft.AspNetCore.Mvc.ViewFeatures.TemplateInfo { HtmlFieldPrefix = $" Orders[{i}]" } }" />
+
+            </div>
+        }
+    </div>
+    <br />
+    @* 🎯 ACTION BUTTONS *@
+    <button type="button" id="addOrderTab" class="btn btn-success">Add Order</button>
+
+    @* 💾 Submits ALL orders at once *@
+    <button type="submit" class="btn btn-primary">Create All Orders</button>
+
+</div>
+
+@* 📋 JAVASCRIPT TEMPLATES: For dynamically adding new order tabs *@
+
+<script type="text/template" id="orderTabTemplate">
+    <li>
+        <a href="#orderTab{{index}}" data-toggle="tab">
+            Order {{number}}
+            <button type="button" class="close remove-order-tab" data-index="{{index}}" style="margin-left:5px;">&times;</button>
+        </a>
+    </li>
+</script>
+
+@* 📋 JAVASCRIPT TEMPLATES: For dynamically adding new order-item rows *@
+<script type="text/template" id="orderItemRowTemplate">
+    <div class="order-item row" data-index="{{index}}">
+        <div class="col-md-3">
+            <select name="OrderItems[{{index}}].ProductId" class="form-control product-select2" style="width:100%;" required>
+                <option value="">Select Product...</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="OrderItems[{{index}}].Price" class="form-control item-price" step="0.01" min="0" placeholder="Price" required />
+        </div>
+        <div class="col-md-2">
+            <input type="number" name="OrderItems[{{index}}].Quantity" class="form-control item-quantity" min="1" value="1" placeholder="Qty" required />
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control item-total" value="$0.00" readonly tabindex="-1" />
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-danger btn-sm remove-item"><i class="fa fa-trash"></i></button>
+        </div>
+    </div>
+</script>
+
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let itemIndex = 0;  // 🔢 Global counter for order items within each order
+
+        $(document).ready(function() {
+            // 🚀 INITIALIZATION: Add first item by default when page loads
+            addOrderItem();
+
+            // ➕ ADD ITEM: Button click handler for adding items to current order
+            $('.addItem').click(function() {
+                addOrderItem();
+            });
+
+            // 🗑️ REMOVE ITEM: Event delegation for dynamically created elements
+            $(document).on('click', '.remove-item', function() {
+                $(this).closest('.order-item').remove();    // Remove the item panel
+                var $tab = $(this).closest('.tab-pane');
+                updateOrderTotal($tab);                         // Recalculate total
+                updateItemIndices($tab);                        // Fix array indices for model binding
+            });
+
+            @*// 🔄 PRODUCT SELECTION: AJAX call to get product details
+            $(document).on('change', '.product-select', function() {
+                const productId = $(this).val();
+                const $container = $(this).closest('.order-item');
+
+                if (productId) {
+                    // 📡 AJAX: Fetch product name and price from server
+                    $.ajax({
+                        url: '@Url.Action("GetProductDetails", "Order")',   // Server endpoint
+                        type: 'POST',
+                        data: { productId: productId },
+                        success: function(response) {
+                            if (response.success) {
+                                // ✅ Auto-fill product name and price
+                                $container.find('.product-name').val(response.name);
+                                $container.find('.item-price').val(response.price);
+                                updateItemTotal($container);
+                            }
+                        }
+                    });
+                }
+            });*@
+
+            // 🔄 PRODUCT SELECT2: Initialize Select2 for product dropdowns
+            function initProductSelect2($select) {
+                $select.select2({
+                    placeholder: 'Select Product...',
+                    allowClear: true,
+                    ajax: {
+                        url: '@Url.Action("SearchProducts", "Order")',
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return { term: params.term };
+                        },
+                        processResults: function (data) {
+                            return { results: data.results };
+                        },
+                        cache: true
+                    }
+                });
+
+                // On product select, fetch price and set it
+                $select.on('select2:select', function (e) {
+                    var data = e.params.data;
+                    var $row = $select.closest('.order-item');
+                    $row.find('.item-price').val(data.price);
+                    //$row.find('.item-quantity').val(1);
+                    $row.find('.item-price').trigger('input');
+                });
+            }
+
+            // 🔢 CALCULATION: Live calculation when price or quantity changes
+            $(document).on('input', '.item-price, .item-quantity', function() {
+                var $row = $(this).closest('.order-item');
+                var $tab = $(this).closest('.tab-pane, .order-form-content');
+                var price = parseFloat($row.find('.item-price').val()) || 0;
+                var qty = parseInt($row.find('.item-quantity').val()) || 0;
+                var total = price * qty;
+                $row.find('.item-total').val('$' + total.toFixed(2));
+                updateOrderTotal($tab);
+
+            });
+        });
+
+        // ➕ FUNCTION: Add new order item to the form
+        function addOrderItem() {
+            var $tab = $(this).closest('.tab-pane');
+            var $orderItems = $tab.find('.orderItems');
+            var template = $('#orderItemRowTemplate').html().replace(/{{index}}/g, orderItemIndex);
+            var $row = $(template);
+            $orderItems.append($row);
+            initProductSelect2($row.find('.product-select2')); // When adding a new order item row, initialize Select2
+            orderItemIndex++;
+        }
+
+        // Also initialize for any existing rows on page load
+        $(function () {
+            $('.product-select2').each(function () {
+                initProductSelect2($(this));
+            });
+        });
+
+        // 💰 FUNCTION: Calculate total for a specific item (Price × Quantity)
+        //function updateItemTotal($container) {
+        //    const price = parseFloat($container.find('.item-price').val()) || 0;
+        //    const quantity = parseInt($container.find('.item-quantity').val()) || 0;
+        //    const total = price * quantity;
+
+        //    $container.find('.item-total').text('$' + total.toFixed(2));    // Display item total
+        //    updateOrderTotal($container);     // Update overall order total
+        //}
+
+        // 💰 FUNCTION: Calculate total price of the whole order
+        function updateOrderTotal($tab) {
+            let total = 0;
+            $('.item-total').each(function() {
+                const itemTotal = parseFloat($(this).text().replace('$', '')) || 0;
+                total += itemTotal;
+            });
+            $('.orderTotal').text(total.toFixed(2));                // Display in UI
+
+
+        }
+
+        // 🔧 FUNCTION: Fix array indices after item removal for proper model binding
+        function updateItemIndices($tab) {
+            $('.order-item').each(function(index) {
+                $(this).attr('data-index', index);
+
+                // 🔄 Update name attributes: OrderItems[0].ProductId, OrderItems[1].ProductId, etc.
+                $(this).find('input, select').each(function() {
+                    const name = $(this).attr('name');
+                    if (name) {
+                        const newName = name.replace(/\[\d+\]/, '[' + index + ']');
+                        $(this).attr('name', newName);
+                    }
+                });
+            });
+            itemIndex = $('.order-item').length;    // Reset counter to current item count
+        }
+
+        // 🔧 FUNCTION: Disbale Table ID if Type of Order is not 2
+        function toggleTableDropdown() {
+            var type = parseInt($('#TypeOfOrder').val(), 10);
+            // Disable TableId if TypeOfOrder is 1, 2, or 3
+            if (type != 2) {
+                $('#TableId').prop('disabled', true).val('');
+            } else {
+                $('#TableId').prop('disabled', false);
+            }
+        }
+        $('#TypeOfOrder').change(toggleTableDropdown);
+        toggleTableDropdown(); // Initial call on page load
+    </script>
+
+    @* 🗂️ TAB MANAGEMENT SCRIPT: Handles adding/removing order tabs *@
+    <script>
+    $(function () {
+        var orderIndex = @Model.Orders.Count;       // 🔢 Track total number of orders
+
+        // ➕ ADD NEW ORDER TAB: Creates new tab and form
+        $('#addOrderTab').click(function () {
+            var tabNumber = orderIndex + 1;
+
+            // 🗂️ Create new tab navigation
+            var tabHtml = $('#orderTabTemplate').html()
+                .replace(/{{index}}/g, orderIndex)              // Internal index for IDs
+                .replace(/{{number}}/g, tabNumber);             // Display number for users
+            $('#orderTabs').append(tabHtml);
+
+            // 📋 Create new tab content (form)
+            // AJAX: Load the partial view for the new order form
+            $.get('@Url.Action("Create", "Order")', { index: orderIndex }, function (formHtml) {
+                var tabPane = $('<div class="tab-pane" id="orderTab' + orderIndex + '"></div>').html(formHtml);
+                $('#orderTabContent').append(tabPane);
+
+                // Activate the newly created tab
+                $('#orderTabs li:last-child a').tab('show');
+            });
+
+            orderIndex++;           // Increment for next order
+        });
+
+        // ❌ REMOVE ORDER TAB: Handles tab deletion
+        $(document).on('click', '.remove-order-tab', function (e) {
+            e.stopPropagation();                // Prevent tab activation when clicking close button
+            var index = $(this).data('index');
+
+            // 🗑️ Remove both tab navigation and content
+            $('#orderTabs li').has('a[href="#orderTab' + index + '"]').remove();
+            $('#orderTab' + index).remove();
+
+            // 🎯 If removed tab was active, activate first remaining tab
+            if ($('#orderTabs li.active').length === 0 && $('#orderTabs li').length > 0) {
+                $('#orderTabs li:first-child a').tab('show');
+            }
+        });
+    });
+    </script>
+}
+```
+
+## Database Configuration
+
+### Update ApplicationDbContext
+```csharp
+public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    {
+    // ... existing DbSets ...
+
+    public DbSet<OrderModel>
+        Orders { get; set; }
+        public DbSet<OrderItemModel>
+            OrderItems { get; set; }
+            public DbSet<ProductModel>
+                Products { get; set; }
+
+                protected override void OnModelCreating(DbModelBuilder modelBuilder)
+                {
+                base.OnModelCreating(modelBuilder);
+
+                // Configure OrderItem relationships
+                modelBuilder.Entity<OrderItemModel>
+                    ()
+                    .HasRequired(oi => oi.Order)
+                    .WithMany(o => o.OrderItems)
+                    .HasForeignKey(oi => oi.OrderId);
+
+                    modelBuilder.Entity<OrderItemModel>
+                        ()
+                        .HasRequired(oi => oi.Product)
+                        .WithMany()
+                        .HasForeignKey(oi => oi.ProductId);
+
+                        // Configure decimal precision
+                        modelBuilder.Entity<OrderModel>
+                            ()
+                            .Property(o => o.TotalPrice)
+                            .HasPrecision(18, 2);
+
+                            modelBuilder.Entity<OrderItemModel>
+                                ()
+                                .Property(oi => oi.Price)
+                                .HasPrecision(18, 2);
+
+                                modelBuilder.Entity<ProductModel>
+                                    ()
+                                    .Property(p => p.Price)
+                                    .HasPrecision(18, 2);
+                                    }
+                                    }
+                                    ```

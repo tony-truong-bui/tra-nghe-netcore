@@ -1,0 +1,140 @@
+﻿@model TraNgheCore.Models.TypeOfOrder
+@{
+    ViewBag.Title = "Create";
+    Layout = "_Layout";
+    var typeOfOrders = ViewBag.Types as List<TraNgheCore.Models.TypeOfOrder>;
+}
+
+<h2>Create Type of Orders</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    @* <div class="form-group"> *@
+    @*     @Html.LabelFor(m => m.Id, htmlAttributes: new { @class = "control-label col-md-2" }) *@
+    @*     <div class="col-md-10"> *@
+    @*         @Html.TextBoxFor(m => m.Id, new { @class = "form-control" }) *@
+    @*         @Html.ValidationMessageFor(m => m.Id, "", new { @class = "text-danger" }) *@
+    @*     </div> *@
+
+    @* </div> *@
+    <div class="form-group">
+        @Html.LabelFor(m => m.Name, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Add Type" class="btn btn-primary" />
+        </div>
+    </div>
+</div>
+
+}
+
+
+@if (typeOfOrders != null && typeOfOrders.Any())
+{
+    <h3>Existing Type of Orders</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in typeOfOrders)
+            {
+                <tr class="item-row-@item.Id">
+                    <td>@item.Id</td>
+                    <td>
+                        <input id="name-input-@item.Id" class="form-control" value="@item.Name" type="text" />
+                    </td>
+                    <td>
+                        <button class="btn btn-success btn-sm update-type"
+                                data-id="@item.Id"
+                                type="button">
+                            Update
+                        </button>
+                        |
+
+                        @*@Html.ActionLink("Delete", "Delete", new { id = category.Id }, new { onclick = "return confirm('Are you sure you want to delete this category?');" })*@
+
+                        <button class="btn btn-danger btn-sm delete-type"
+                                data-id="@item.Id"
+                                type="button">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No type of orders available.</p>
+}
+
+
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            $('.delete-type').on('click', function () {
+                var id = $(this).data('id');
+                if (confirm('Are you sure you want to delete this type of order?')) {
+                    $.ajax({
+                        url: '@Url.Action("Delete", "TypeOfOrder")',
+                        type: 'POST',
+                        data: { id: id },
+                        success: function (result) {
+                            if (result.success) {
+                                $('.item-row-' + id).fadeOut(300, function () { $(this).remove(); });
+                                alert('Type of order deleted successfully.');
+                            } else {
+                                alert('Error deleting type of order: ' + result.message);
+                            }
+                        },
+                        error: function () {
+                            alert('An error occurred while deleting the type of order.');
+                        }
+                    });
+                }
+            });
+        })
+    </script>
+    
+    <script>
+        $(function () {
+            $('.update-type').on('click', function () {
+                var id = $(this).data('id');
+                var name = $('#name-input-' + id).val();
+                $.ajax({
+                    url: '@Url.Action("Update", "TypeOfOrder")',
+                    type: 'POST',
+                    data: { id: id, name: name },
+                    success: function (result) {
+                        if (result.success) {
+                            alert('Type of order updated successfully.');
+                        } else {
+                            alert('Error updating type of order: ' + result.message);
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while updating the type of order.');
+                    }
+                });
+            });
+        })
+    </script>
+    
+    }

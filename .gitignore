@@ -1,0 +1,31 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# NuGet Packages
+packages/
+*.nupkg
+#!/packages/
+
+# Others
+*.log
+*.tlog
+*.cache
+*.pdb
+*.dbmdl
+.vscode/
+
+# env files (can opt-in for committing if needed)
+*.env
+
+
+appsettings.Development.
+Thumbs.db
