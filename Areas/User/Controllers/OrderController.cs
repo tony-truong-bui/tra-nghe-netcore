@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using TraNgheCore.Models;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using TraNgheCore.Areas.User.Models;
 
 
 
@@ -21,16 +22,35 @@ namespace TraNgheCore.Areas.User.Controllers
             db = _db;
         }
 
+
+        // For one form partial view
+        public IActionResult OrderFormPartial(int index)
+        {
+            var model = new CreateOrderViewModel();
+            ViewBag.Products = GetProductOptions();
+            ViewBag.Tables = GetTableSelectList();
+            ViewBag.TypesOfOrders = GetTypeOfOdersSelectList();
+            var templInfo = new TemplateInfo { HtmlFieldPrefix = $"Orders[{index}]" };
+            ViewData["TemplateInfo"] = templInfo; // Pass template info for correct model binding
+            return PartialView("_CreateOrderForm", model);
+        }
+
+
         // 📝 GET: Display order creation form for customers
         // URL: /User/Order/Create
         public IActionResult Create(int index)
         {
+            var multiModel = new MultiOrderCreateViewModel
+            {
+                Orders = new List<CreateOrderViewModel>()       // Initialize with one empty order
+            };
             // Initialize empty ViewModel for new order
-            var model = new CreateOrderViewModel();
+            multiModel.Orders.Add(new CreateOrderViewModel());
+
 
             // Load available products for dropdown selection
             // Only shows products that are currently being served
-            ViewBag.Products = GetProductSelectList();
+            ViewBag.Products = GetProductOptions();
 
             //Load available tables for dine-in orders
             // Only shows tables that are currently available
@@ -42,7 +62,7 @@ namespace TraNgheCore.Areas.User.Controllers
             var templateInfo = new TemplateInfo { HtmlFieldPrefix = $"Orders[{index}]" };
             ViewData["TemplateInfo"] = templateInfo;
 
-            return PartialView("_CreateOrderForm", model);
+            return View(multiModel);
         }
 
         // 💾 POST: Process customer's order submission
@@ -63,22 +83,26 @@ namespace TraNgheCore.Areas.User.Controllers
                         CustomerName = model.CustomerName,
                         CustomerPhone = model.CustomerPhone,
                         CustomerAddress = model.CustomerAddress,
+                        TableId = model.TableId ?? default(int), // Nullable for dine-in orders
                         OrderDate = DateTime.Now,
                         TotalPrice = model.OrderItems.Sum(item => item.Price * item.Quantity),
                         TypeOfOrder = model.TypeOfOrder, // Default to 0 if not specified'
                         OrderStatus = 0, // Default status - Creating
                         UserId = userId,
 
-                        TableId = model.TableId ?? default(int), // Nullable for dine-in orders  
+                        // TableId = model.TableId ?? default(int), // Nullable for dine-in orders  
                         //TableId = (int)(model.TableId.HasValue ? model.TableId.Value : (int?) null), // Nullable for dine-in orders
 
                     };
+                    Console.WriteLine("Creating order for user: " + order);
                     db.Orders.Add(order);
                     db.SaveChanges(); // Get the Order ID
 
                     // 🏗️ STEP 2: Create individual order items
                     foreach (var item in model.OrderItems)
                     {
+                        
+                        item.ProductName = db.Products.FirstOrDefault(p => p.Id == item.ProductId)?.Name; // Set product name from details
                         var orderItem = new OrderItemModel
                         {
                             OrderId = order.Id,
@@ -98,19 +122,20 @@ namespace TraNgheCore.Areas.User.Controllers
                     TempData["Success"] = "Order created successfully!";
 
                     // 🔄 Redirect to order details page (PRG pattern)
-                    return RedirectToAction("Details", new { id = order.Id });
+                    return Json(new { success = true, message = "Order created successfully!", orderId = order.Id });
                 }
                 catch (Exception ex)
                 {
-                    ModelState.AddModelError("", "An error occurred while creating the order: " + ex.Message);
+                    return Json(new { success = false, message = "An error occurred while creating the order: " + ex.Message });
                 }
             }
             // 🔄 If validation fails or error occurs, reload form with products
-            ViewBag.Products = GetProductSelectList();
-            return View(model);
+            ViewBag.Products = GetProductOptions();
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return Json(new { success = false, message = "Validation failed.", errors });
         }
 
-        // ⚡ AJAX: Fetch product details for dynamic form updates
+        //⚡AJAX: Fetch product details for dynamic form updates
         // AJAX: Get product details
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -130,16 +155,18 @@ namespace TraNgheCore.Areas.User.Controllers
             return Json(new { success = false });
         }
 
-        // 🛠️ Helper: Create dropdown list of available products
-        private SelectList GetProductSelectList()
+        // 🛠️ Create dropdown list of available products
+        private IEnumerable<ProductOptionViewModel> GetProductOptions()
         {
-            return new SelectList(
-                // 📋 Query: Only products that are currently being served
-                db.Products.Where(p => p.IsServed).ToList(),
-                "Id",       // Value field (what gets submitted)
-                "Name",     // Text field (what user sees)
-                null        // Selected value (none by default)
-            );
+            return db.Products
+                .Where(p => p.IsServed)
+                .Select(p => new ProductOptionViewModel
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Price = p.Price
+                })
+                .ToList();
         }
 
         //Create dropdown list of available tables

@@ -85,14 +85,26 @@ namespace TraNgheCore.Areas.Admin.Controllers
             var userList = UserManager.Users.ToList();
 
             // For each user, asynchronously fetch their roles and build a UserViewModel.
-            // Task.WhenAll runs all role-fetching tasks in parallel for better performance.
-            var userViewModels = await Task.WhenAll(userList.Select(async u => new UserViewModel
+            //// Task.WhenAll runs all role-fetching tasks in parallel for better performance.
+            //var userViewModels = await Task.WhenAll(userList.Select(async u => new UserViewModel
+            //{
+            //    Id = u.Id,
+            //    UserName = u.UserName,
+            //    Email = u.Email,
+            //    Roles = (await UserManager.GetRolesAsync(u)).ToList() // Fetch roles for this user
+            //}));
+            var userViewModels = new List<UserViewModel>();
+            foreach (var u in userList)
             {
-                Id = u.Id,
-                UserName = u.UserName,
-                Email = u.Email,
-                Roles = (await UserManager.GetRolesAsync(u)).ToList() // Fetch roles for this user
-            }));
+                var roles = await UserManager.GetRolesAsync(u);
+                userViewModels.Add(new UserViewModel
+                {
+                    Id = u.Id,
+                    UserName = u.UserName,
+                    Email = u.Email,
+                    Roles = roles.ToList()
+                });
+            }
 
 
 
@@ -113,7 +125,7 @@ namespace TraNgheCore.Areas.Admin.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateUserViewModel model)
+        public async Task<IActionResult> Create(UserListViewModel model)
         {
             // === INPUT VALIDATION PHASE ===
             if (ModelState.IsValid)
@@ -121,20 +133,20 @@ namespace TraNgheCore.Areas.Admin.Controllers
                 // === USER CREATION PROCESS ===
 
                 // Step 1: Create user object with email-based authentication
-                var user = new IdentityModel { UserName = model.Email, Email = model.Email };
+                var user = new IdentityModel { UserName = model.CreateUser.Email, Email = model.CreateUser.Email };
                 // Additional restaurant fields could be set here:
                 // StaffId = GenerateStaffId(),
                 // HireDate = DateTime.Now,
                 // RestaurantLocation = "Main Branch"
 
                 // Step 2: Create user account with password hashing
-                var result = await UserManager.CreateAsync(user, model.Password);
+                var result = await UserManager.CreateAsync(user, model.CreateUser.Password);
                 if (result.Succeeded)
                 {
                     // === SUCCESS WORKFLOW ===
                     // Step 3: Assign selected role to new user
 
-                    foreach (var role in model.Role)
+                    foreach (var role in model.CreateUser.Role)
                     {
                         await UserManager.AddToRoleAsync(user, role);
                     }

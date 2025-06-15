@@ -72,7 +72,7 @@ namespace TraNgheCore.Controllers
                     return RedirectToAction("Index", "Dashboard", new { area = "Admin" });
                 else
                     // Redirect regular users to the user home page
-                    return RedirectToAction("Index", "Home", new { area = "User" });
+                    return RedirectToAction("Index", "Dashboard", new { area = "User" });
             }
 
             // If login failed, add a generic error message to the form

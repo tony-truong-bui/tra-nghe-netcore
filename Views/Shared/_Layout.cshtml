@@ -35,30 +35,40 @@
                             <li class="nav-item">
                                 @Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "Admin" }, new { @class = "nav-link" })
                             </li>
-                            <li>
+                            <li class="nav-item">
                                 @Html.ActionLink("Product", "Create", "Product", new { area = "Admin" }, new { @class = "nav-link" })
                             </li>
 
-                            <li>
+                            <li class="nav-item" >
                                 @Html.ActionLink("Category", "Create", "Category", new { area = "Admin" }, new { @class = "nav-link" })
                             </li>
 
-                            <li>
+                            <li class="nav-item">
                                 @Html.ActionLink("Table", "Create", "Table", new { area = "Admin" }, new { @class = "nav-link" })
                             </li>
 
-                            <li>
+                            <li class="nav-item">
                                 @Html.ActionLink("User", "Create", "User", new { area = "Admin" }, new { @class = "nav-link" })
                             </li>
-                            <li>
+                            <li class="nav-item">
                                 @Html.ActionLink("Type of Order", "Create", "TypeOfOrder", new { area = "Admin" }, new { @class = "nav-link" })
                             </li>
                         } else if (User.IsInRole("User")) {
-                            <li>
+                            <li class="nav-item">
                                 @Html.ActionLink("Order", "Create", "Order", new { area = "User" }, new { @class = "nav-link" })
                             </li>
-                            <li>
-                                @Html.ActionLink("Order", "Index", "Order", new { area = "User" }, new { @class = "nav-link" })
+                            <li class="nav-item">
+                                @Html.ActionLink("OrderList", "Index", "OrderList", new { area = "User" }, new { @class = "nav-link" })                             
+                            </li>
+                        }
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item">
+                                <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
+                                    <button type="submit" class="nav-link btn btn-link" style="display:inline; padding:0; border:none; background:none;">
+                                        Log Out
+                                    </button>
+                                </form>
                             </li>
                         }
                     </ul>
@@ -78,6 +88,8 @@
         </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
