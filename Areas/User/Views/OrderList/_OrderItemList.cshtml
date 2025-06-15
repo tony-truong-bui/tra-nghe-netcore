@@ -1,0 +1,13 @@
+@model IEnumerable<TraNgheCore.Models.OrderItemViewModel>
+
+@foreach (var orderItem in Model)
+{
+    <div class="order-detail d-flex flex-row justify-content-between mb-3 border p-3">
+        <p><strong>Product ID:</strong> @orderItem.ProductId</p>
+        <p><strong>Product Name:</strong> @orderItem.ProductName</p>
+        <p><strong>Price:</strong> @orderItem.Price.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</p>
+        <p><strong>Quantity:</strong> @orderItem.Quantity</p>
+        <p><strong>Total:</strong> @orderItem.Total.ToString("C", new System.Globalization.CultureInfo("vi-VN"))</p>
+    </div>
+    
+}

@@ -1,6 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
-
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TraNgheCore.Models
 {
@@ -9,7 +9,6 @@ namespace TraNgheCore.Models
         [Key]
         public int Id { get; set; }
 
-        
         [StringLength(100, ErrorMessage = "Customer name cannot exceed 100 characters")]
         [Display(Name = "Customer Name")]
         public string CustomerName { get; set; }
@@ -44,6 +43,7 @@ namespace TraNgheCore.Models
 
         [Display(Name = "Total Price")]
         [Range(0, double.MaxValue, ErrorMessage = "Total price must be a positive number")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal TotalPrice { get; set; }
 
         [Display(Name = "User ID")]

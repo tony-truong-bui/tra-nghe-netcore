@@ -13,5 +13,6 @@ namespace TraNgheCore.Models
         public string TableName { get; set; } // Name of the table if applicable
         public string UserName { get; set; } // Name of the user who created the order
 
+        public List<OrderItemViewModel> OrderItems { get; set; } // List of items in the order
     }
 }

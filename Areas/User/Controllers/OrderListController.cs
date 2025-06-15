@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using TraNgheCore.Models;
 
@@ -38,7 +39,17 @@ namespace TraNgheCore.Areas.User.Controllers
                  o.TotalPrice,
                  o.OrderStatus,
                  o.TypeOfOrder,
-                 o.TableId
+                 o.TableId,
+                 o.UserId,
+                 OrderItems = db.OrderItems.Where(oi => oi.OrderId == o.Id).Select(oi => new OrderItemModel
+                 {
+                     ProductId = oi.ProductId,
+                     ProductName = oi.ProductName,
+                     Quantity = oi.Quantity,
+                     Price = oi.Price,
+                     // Calculate total for each item
+
+                 }).ToList() // Include order items in the projection
              });
 
             // ⚡ Execute query and materialize results in memory
@@ -63,6 +74,11 @@ namespace TraNgheCore.Areas.User.Controllers
                 OrderDate = o.OrderDate,
                 TotalPrice = o.TotalPrice,
                 OrderStatus = o.OrderStatus,
+                UserName = o.UserId != null //If UserId is not null, then proceed to lookup
+                                            // Safe lookup for UserName in Users table with Id = o.UserId.
+                    ? db.Users.FirstOrDefault(u => u.Id == o.UserId)?.UserName
+                    ?? "Unknown" // If UserName is null, set to "Unknown"
+                    : "Unknown", // If UserId is null, set to "Unknown"
 
                 // 🔍 SAFE LOOKUP: Order Type with null checking
                 TypeOfOrder = o.TypeOfOrder.HasValue && typeOfOrderDict.ContainsKey(o.TypeOfOrder.Value)
@@ -73,10 +89,41 @@ namespace TraNgheCore.Areas.User.Controllers
                 TableName = tableDict.ContainsKey(o.TableId)     // ✅ Found: Return table name
                     ? tableDict[o.TableId]
                     : "N/A"                            // ❌ Not found: Display "N/A"
+                ,
+                // 🔄 MAP ORDER ITEMS: Convert anonymous items to ViewModel
+                OrderItems = o.OrderItems.Select(oi => new OrderItemViewModel
+                {
+                    ProductId = oi.ProductId,
+                    ProductName = oi.ProductName,
+                    Quantity = oi.Quantity,
+                    Price = oi.Price,
+                }).ToList() // Convert to List<OrderItemViewModel>
             }).ToList();
 
             // 📤 RETURN: Pass transformed data to view
             return View(orders);     // View receives List<OrderListViewModel>
+        }
+
+        public async Task<IActionResult> GetOrderDetails(int id)
+        {
+            var orderItems = await db.OrderItems
+                .Where(o => o.OrderId == id)
+                .Select(o => new OrderItemViewModel {
+                ProductId = o.ProductId,
+                ProductName = o.ProductName,
+                Price = o.Price,
+                Quantity = o.Quantity,
+
+                })
+                .ToListAsync(); 
+            if (orderItems == null)
+            {
+                // Handle case where order is not found
+                return NotFound();
+            }
+
+            // Return a partial view or JSON with order items
+            return PartialView("_OrderItemList", orderItems);
         }
     }
     

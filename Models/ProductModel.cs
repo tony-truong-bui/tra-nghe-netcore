@@ -1,5 +1,6 @@
 ﻿
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 
 namespace TraNgheCore.Models
@@ -33,9 +34,10 @@ namespace TraNgheCore.Models
         [Display(Name = "Is Currently Served")]
         public bool IsServed { get; set; }
 
-        
+
         [Range(0, double.MaxValue, ErrorMessage = "Price must be a positive number")]
         [Display(Name = "Price")]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
     }
 }

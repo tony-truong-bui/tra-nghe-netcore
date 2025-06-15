@@ -3,7 +3,7 @@
     ViewBag.Title = "Index";
     Layout = "_Layout";
 }
-
+@Html.AntiForgeryToken()
 <h2>Order List</h2>
 <table class="table">
     <thead>
@@ -29,9 +29,65 @@
                 <td>@order.TotalPrice.ToString("C")</td>
                 <td>@order.OrderStatus</td>
                 <td>@order.UserName</td>
-                <td>@Html.ActionLink("Details", "Details", new { id = order.Id }, new { @class = "btn btn-info btn-sm" })</td>
+                <td>
+                    <button data-order-id="@order.Id" class="btn btn-info btn-detail" data-toggle="modal" data-target="#orderDetail">Details</button>
+                </td>
+
+                <!-- 
+                    Bootstrap Modal for displaying order details.
+                    This modal is hidden by default and shown when triggered (e.g., by clicking a button).
+                -->
+                <div id="orderDetail" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Order Details</h5>
+                                @* <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button> *@
+                            </div>
+                            <div class="modal-body">
+                                <!-- Order details will be loaded here -->
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary close" data-dismiss="modal" aria-label="Close">Close</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </tr>
         }
     </tbody>
 </table>
 
+
+@section Scripts {
+    <!-- jQuery (required for Bootstrap 4 and below) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Initialize Bootstrap tooltips
+            @* $('[data-toggle="tooltip"]').tooltip(); *@
+
+            // Handle order detail modal
+            $('.btn-detail').on('click', function (e) {
+                e.preventDefault();
+                var orderId = $(this).data('order-id');
+                // Fetch order details via AJAX
+                $.get('@Url.Action("GetOrderDetails", "OrderList")', { id: orderId }, function (data) {
+                     // Populate modal body with returned HTML or JSON data
+                    @* var orderDetailHtml = $('<div class="modal-body"></div>').html(data); *@
+                    $('#orderDetail .modal-body').html(data);
+                    $('#orderDetail').modal('show');
+                });
+            });
+
+            $('.close').on('click', function () {
+                $('#orderDetail').modal('hide');
+            });
+        });
+    </script>
+}
