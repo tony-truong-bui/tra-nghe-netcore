@@ -19,7 +19,7 @@
     @Html.AntiForgeryToken()
     <div class="form-group">
 
-        @Html.Label("Email",null, new { @class = "fs-4" })
+        @Html.Label("Email",null, new { @class = "fs-5" })
         <div class="form-floating">
             @Html.TextBox("email", null, new
             {
@@ -31,7 +31,7 @@
     </div>
 </div>
 <div class="form-group mt-3">
-    @Html.Label("Password",null,new { @class = "fs-4" })
+    @Html.Label("Password",null,new { @class = "fs-5" })
     <div class="form-floating">
         @Html.Password("password", null, new
                 {
@@ -42,7 +42,7 @@
         @* Note: Html.Password() automatically creates input type="password" *@
     </div>
 </div>
-<button type="submit" class="btn btn-primary w-100 py-2 mt-3"><span class="fs-4">Login</span></button>
+<button type="submit" class="btn btn-primary w-100 py-2 mt-3"><span class="fs-5">Login</span></button>
 }
 
 @*

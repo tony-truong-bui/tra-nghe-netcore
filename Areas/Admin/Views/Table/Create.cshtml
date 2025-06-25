@@ -13,7 +13,7 @@
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
+    <div class="form-horizontal mb-3">
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
@@ -24,25 +24,25 @@
         @*         @Html.ValidationMessageFor(m => m.Id, "", new { @class = "text-danger" }) *@
         @*     </div> *@
         @* </div> *@
-        <div class="form-group">
+        <div class="form-group mb-3">
             @Html.LabelFor(m => m.Name, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
                 @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group mb-3">
             @Html.LabelFor(m => m.IsAvailable, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.DropDownListFor(m => m.IsAvailable, new List<SelectListItem>
                 {
                     new SelectListItem { Text = "Available", Value = "true" },
                     new SelectListItem { Text = "Not Available", Value = "false" }
-                }, new { @class = "dropdown" })
+                }, new { @class = "form-select" })
                 @Html.ValidationMessageFor(m => m.IsAvailable, "", new { @class = "text-danger" })
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group mb-3">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Add Table" class="btn btn-primary" />
             </div>

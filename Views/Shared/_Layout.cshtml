@@ -12,23 +12,23 @@
     <link rel="stylesheet" href="~/TraNgheCore.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/MyStyle.css" />    
 </head>
-<body class="custom-bg text-light">
+<body class="">
     <header class="">
-        <nav class="navbar rounded navbar-expand-sm navbar-toggleable-sm nav-light border-bottom box-shadow mb-3 ">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm nav-light border-bottom border-1 box-shadow mb-3 ">
             <div class="container-fluid">
                 @if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))   
                 {
                 @* <a class="navbar-brand" asp-area="" asp-controller="Dashboard" asp-action="Index" style="font-weight: bold;">TraNgheCore</a> *@
-                    @Html.ActionLink("TraNgheCore", "Index", "Dashboard", new { area = "Admin" }, new { @class = "navbar-brand text-white", style = "font-weight: bold;" })
+                    @Html.ActionLink("Tra Nghe Core", "Index", "Dashboard", new { area = "Admin" }, new { @class = "navbar-brand", style = "font-size: 1.5rem;" })
                 } else if (User.Identity.IsAuthenticated && User.IsInRole("User")) {
-                    @Html.ActionLink("TraNgheCore", "Index", "Dashboard", new { area = "User" }, new { @class = "navbar-brand text-white", style = "font-weight: bold;" })
-                } 
+                    @Html.ActionLink("Tra Nghe Core", "Index", "Dashboard", new { area = "User" }, new { @class = "navbar-brand", style = "font-size: 1.5rem;" })
+                }
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse  justify-content-between">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav me-auto mb-lg-0 text-center gap-4">
                         @* <li class="nav-item"> *@
                         @*     <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a> *@
                         @* </li> *@
@@ -40,32 +40,40 @@
                         @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                @Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "Admin" }, new { @class = "nav-link text-white" })
+                                <img src="~/images/dashboard.png" alt="Dashboard" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("Dashboard", "Index", "Dashboard", new { area = "Admin" }, new { @class = "nav-link m-0 p-0" })
                             </li>
                             <li class="nav-item">
-                                @Html.ActionLink("Product", "Create", "Product", new { area = "Admin" }, new { @class = "nav-link" })
+                                <img src="~/images/boba.png" alt="Product" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("Product", "Create", "Product", new { area = "Admin" }, new { @class = "nav-link m-0 p-0" })
                             </li>
 
                             <li class="nav-item" >
-                                @Html.ActionLink("Category", "Create", "Category", new { area = "Admin" }, new { @class = "nav-link" })
+                                <img src="~/images/categories.png" alt="Category" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("Category", "Create", "Category", new { area = "Admin" }, new { @class = "nav-link m-0 p-0" })
                             </li>
 
                             <li class="nav-item">
-                                @Html.ActionLink("Table", "Create", "Table", new { area = "Admin" }, new { @class = "nav-link" })
+                                <img src="~/images/table.png" alt="Table" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("Table", "Create", "Table", new { area = "Admin" }, new { @class = "nav-link m-0 p-0" })
                             </li>
 
                             <li class="nav-item">
-                                @Html.ActionLink("User", "Create", "User", new { area = "Admin" }, new { @class = "nav-link" })
+                                <img src="~/images/users.png" alt="User" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("User", "Create", "User", new { area = "Admin" }, new { @class = "nav-link m-0 p-0" })
                             </li>
                             <li class="nav-item">
-                                @Html.ActionLink("Type of Order", "Create", "TypeOfOrder", new { area = "Admin" }, new { @class = "nav-link" })
+                                <img src="~/images/orderTypes.png" alt="Type of Order" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("Type of Order", "Create", "TypeOfOrder", new { area = "Admin" }, new { @class = "nav-link m-0 p-0" })
                             </li>
                         } else if (User.IsInRole("User")) {
                             <li class="nav-item">
-                                @Html.ActionLink("Order", "Create", "Order", new { area = "User" }, new { @class = "nav-link" })
+                                <img src="~/images/order.png" alt="Order" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("Order", "Create", "Order", new { area = "User" }, new { @class = "nav-link m-0 p-0" })
                             </li>
                             <li class="nav-item">
-                                @Html.ActionLink("OrderList", "Index", "OrderList", new { area = "User" }, new { @class = "nav-link" })                             
+                                <img src="~/images/orderList.png" alt="Order List" class="img-fluid" style="width: 30px; height: 30pxter;"/>
+                                @Html.ActionLink("OrderList", "Index", "OrderList", new { area = "User" }, new { @class = "nav-link m-0 p-0" })
                             </li>
                         }
 
@@ -75,8 +83,10 @@
                         {
                             <div class="nav-item">
                                 <form asp-area="" asp-controller="Account" asp-action="Logout" method="post" class="form-inline">
-                                    <button type="submit" class="nav-link btn btn-link" style="display:block; position:fixed;right:15px; top:15px;font-weight:bold; padding:0; border:none; background:none;">
-                                        Log Out
+                                    
+                                    <button type="submit" class=" btn" style="display:block; position:fixed;right:15px; top:15px;padding:6px;">
+                                        <svg aria-hidden="true" focusable="false" class="octicon octicon-sign-out Octicon-sc-9kayk9-0" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" display="inline-block" overflow="visible" style="vertical-align: text-bottom;"><path d="M2 2.75C2 1.784 2.784 1 3.75 1h2.5a.75.75 0 0 1 0 1.5h-2.5a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h2.5a.75.75 0 0 1 0 1.5h-2.5A1.75 1.75 0 0 1 2 13.25Zm10.44 4.5-1.97-1.97a.749.749 0 0 1 .326-1.275.749.749 0 0 1 .734.215l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.97-1.97H6.75a.75.75 0 0 1 0-1.5Z"></path></svg>
+                                        Sign out
                                     </button>
                                 </form>
                             </div>

@@ -15,11 +15,11 @@
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
+    <div class="form-horizontal mb-3">
         <hr />
         @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             @Html.LabelFor(m => m.Name, htmlAttributes: new { @class = "control-label col-md-2" })
             <div class="col-md-10">
                 @Html.TextBoxFor(m => m.Name, new { @class = "form-control" })
@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        <div class="form-group">
+        <div class="form-group mb-3">
             <div class="col-md-offset-2 col-md-10">
                 <input type="submit" value="Add Category" class="btn btn-primary" />
             </div>
@@ -41,7 +41,7 @@
 
 @if (categories != null && categories.Any())
 {
-    <h3>Existing Categories</h3>
+    <h3>Categories</h3>
     <table class="table">
         <thead>
             <tr>
@@ -78,7 +78,7 @@
                 </tr>
             }
         </tbody>
-        }
+        
     </table>
 }
 else
