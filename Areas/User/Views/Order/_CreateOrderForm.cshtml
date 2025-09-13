@@ -4,10 +4,10 @@
 <div class="order-form-content">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h3>Customer Information 01</h3>
+            <h3>Customer Information</h3>
         </div>
         <div class="panel-body">
-            <div class="form-group">
+            <div class="form-group mb-3">
                 @Html.LabelFor(m => m.CustomerName, new { @class = "col-md-2 control-label" })
                 <div class="col-md-10">
                     @* ✅ Required field with client-side validation *@
@@ -16,33 +16,33 @@
                     @Html.ValidationMessageFor(m => m.CustomerName)
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 @Html.LabelFor(m => m.CustomerPhone, new { @class = "col-md-2 control-label" })
                 <div class="col-md-10">
                     @Html.TextBoxFor(m => m.CustomerPhone, new { @class = "form-control", required = "required" })
                     @Html.ValidationMessageFor(m => m.CustomerPhone)
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 @Html.LabelFor(m => m.CustomerAddress, new { @class = "col-md-2 control-label" })
                 <div class="col-md-10">
                     @Html.TextAreaFor(m => m.CustomerAddress, new { @class = "form-control", rows = 3 })
                     @Html.ValidationMessageFor(m => m.CustomerAddress)
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 @Html.LabelFor(m => m.TypeOfOrder, new { @class = "col-md-2 control-label" })
                 <div class="col-md-10 TypeOfOrder">
                     @* 🏓 Table dropdown populated from ViewBag.TypesOfOrders*@
-                    @Html.DropDownListFor(m => m.TypeOfOrder, ViewBag.TypesOfOrders as SelectList, "Select type of orders", new { @class = "form-control", required = "required" })
+                    @Html.DropDownListFor(m => m.TypeOfOrder, ViewBag.TypesOfOrders as SelectList, "Select type of orders", new { @class = "form-select", required = "required" })
                     @Html.ValidationMessageFor(m => m.TypeOfOrder)
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 @Html.LabelFor(m => m.TableId, new { @class = "col-md-2 control-label" })
                 <div class="col-md-10">
                     @* 🏓 Table dropdown populated from ViewBag.Tables *@
-                    @Html.DropDownListFor(m => m.TableId, ViewBag.Tables as SelectList, "--Select Table--", new { @class = "form-control", required = "required" })
+                    @Html.DropDownListFor(m => m.TableId, ViewBag.Tables as SelectList, "--Select Table--", new { @class = "form-select", required = "required" })
                     @Html.ValidationMessageFor(m => m.TableId)
                 </div>
             </div>
@@ -67,7 +67,7 @@
             @* 💰 Order Total Display *@
             <div class="row">
                 <div class="col-md-12 text-right">
-                    <h4>Total: $<span class="orderTotal">0.00</span></h4>
+                    <h4>Total: <span class="orderTotal">0.00</span></h4>
                 </div>
             </div>
         </div>

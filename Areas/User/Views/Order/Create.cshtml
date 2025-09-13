@@ -12,23 +12,31 @@
 
 @Html.AntiForgeryToken()
 <div class="order-tabs-container">
-    @* 🗂️ TAB NAVIGATION: Bootstrap tabs for multiple orders *@
-    <ul class="nav nav-tabs" id="orderTabs" role="tablist">
-        @for (int i = 0; i < Model.Orders.Count; i++)
-        {
-            <li class="nav-item">
-                @* 📌 First tab is active by default *@
-                <a href="#orderTab-@i" class="nav-link active" data-toggle="tab">
-                    Order @(i + 1) @* 👥 User-friendly numbering (1, 2, 3...) *@
+    <div class="flex flex-row justify-content-between align-items-center mb-3">
+        @* 🗂️ TAB NAVIGATION: Bootstrap tabs for multiple orders *@
+        <ul class="nav nav-tabs" id="orderTabs" role="tablist">
+            @for (int i = 0; i < Model.Orders.Count; i++)
+            {
+                <li class="nav-item">
+                    @* 📌 First tab is active by default *@
+                    <a href="#orderTab-@i" class="nav-link active" data-toggle="tab">
+                        Order @(i + 1) @* 👥 User-friendly numbering (1, 2, 3...) *@
 
-                    @* ❌ Close button for each tab (except can't close if only one) *@
-                    <button type="button" class="close remove-order-tab" data-index="@i"
-                        style="margin-left:5px;">&times;</button>
-                </a>
-            </li>
-        }
-    </ul>
+                        @* ❌ Close button for each tab (except can't close if only one) *@
+                        <button type="button" class="close remove-order-tab" data-index="@i"
+                            style="margin-left:5px;">&times;</button>
+                    </a>
+                </li>
+            }
 
+        </ul>
+        <div class="nav-item">
+            @* ➕ Button to add new order tab *@
+            <button type="button" id="addOrderTab" class="btn btn-outline-info btn-sm">
+                <i class="fa fa-plus"></i>➕ Add Order
+            </button>
+        </div>
+    </div>
     @* 📋 TAB CONTENT: Each tab contains a complete order form *@
     <div class="tab-content" id="orderTabContent">
         @for (int i = 0; i < Model.Orders.Count; i++)
@@ -37,22 +45,22 @@
 
                 @* 🔧 PARTIAL VIEW: Reuses single order form with unique field prefixes *@
                 @* CRITICAL: HtmlFieldPrefix makes form fields like Orders[0].CustomerName, Orders[1].CustomerName *@
-                
+
                 <form asp-action="Create" method="post" class="order-form">
                     @Html.AntiForgeryToken()
                     @await Html.PartialAsync(
-                        "_CreateOrderForm",
-                        Model.Orders[i]
-                    )             
-                     @* 💾 Submits current order *@
-                   
-                </form>
-            </div>
-        }
+                    "_CreateOrderForm",
+                                Model.Orders[i]
+                                )
+                @* 💾 Submits current order *@
+
+            </form>
+        </div>
+                }
     </div>
     <br />
-    @* 🎯 ACTION BUTTONS *@
-    <button type="button" id="addOrderTab" class="btn btn-success">Add Order</button>
+    @* 🎯 ACTION BUTTONS
+    <button type="button" id="addOrderTab" class="btn btn-success">Add Order</button> *@
 
 
 
@@ -71,13 +79,13 @@
 
 @* 📋 JAVASCRIPT TEMPLATES: For dynamically adding new order-item rows *@
 <script type="text/template" id="orderItemRowTemplate">
-    <div class="order-item row" data-index="{{index}}">
+    <div class="order-item row mt-3" data-index="{{index}}">
         <div class="col-md-3">
-            <select name="OrderItems[{{index}}].ProductId" class="form-control product-select2" style="width:100%;" required>
+            <select name="OrderItems[{{index}}].ProductId" class="product-select2" style="width:100%;" required>
                 <option value="">--Select Product--</option>
                 @foreach (var product in ViewBag.Products as IEnumerable<ProductOptionViewModel>)
                 {
-                        <option value="@product.Id" data-price="@product.Price">@product.Name</option>
+                                    <option value="@product.Id" data-price="@product.Price">@product.Name</option>
                 }
             </select>
         </div>
@@ -88,7 +96,7 @@
             <input type="number" name="OrderItems[{{index}}].Quantity" class="form-control item-quantity" min="1" value="1" placeholder="Qty" required />
         </div>
         <div class="col-md-2">
-            <input type="text" class="form-control item-total" value="$0.00" readonly tabindex="-1" />
+            <input type="text" class="form-control item-total" value="0.00 vnđ" readonly tabindex="-1" />
         </div>
         <div class="col-md-1">
             <button type="button" class="btn btn-danger btn-sm remove-item"><i class="fa fa-trash">X</i></button>
@@ -150,15 +158,17 @@
             }); *@
 
 
-
                 // 🔢 CALCULATION: Live calculation when price or quantity changes
                 $(document).on('input', '.item-price, .item-quantity', function () {
                     var $row = $(this).closest('.order-item');
                     var $tab = $(this).closest('.tab-pane, .order-form-content');
+
                     var price = parseFloat($row.find('.item-price').val()) || 0;
+
+
                     var qty = parseInt($row.find('.item-quantity').val()) || 0;
                     var total = price * qty;
-                    $row.find('.item-total').val('$' + total.toFixed(2));
+                    $row.find('.item-total').val(total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' vnđ');
                     updateOrderTotal($tab);
 
                 });
@@ -166,11 +176,11 @@
 
         // ➕ FUNCTION: Add new order item-row to the form
         function addOrderItem($tab) {
-            
+
             // Find the closest parent tab-pane to determine which tab the button was clicked in
             $tab = $tab || $('.tab-pane.active');
 
-            
+
 
             // Find the container where order item rows are stored within this tab
             var $orderItems = $tab.find('.orderItems');
@@ -200,9 +210,10 @@
         }
         // 🔄 PRODUCT SELECT2: Initialize Select2 for product dropdowns
         function initProductSelect2($select) {
-            
+
             // Initialize the Select2 plugin on the given select element
             $select.select2({
+                // Use Bootstrap 4 theme
                 placeholder: 'Select Product...',
                 allowClear: true,
             });
@@ -214,11 +225,10 @@
                 var $row = $select.closest('.order-item');
 
                 var price = $select.find('option:selected').data('price'); // Get price from data attribute
-                
+
                 $row.find('.item-price').val(price).trigger('input'); // Set price and trigger input event for calculation
 
                 $tab = $(this).closest('.tab-pane');
-                console.log('tab:', $tab.attr('id')); // Debugging log
                 updateOrderTotal($tab); // Update order total after setting price
                 updateItemIndices($tab); // Update indices for model binding
             });
@@ -245,15 +255,15 @@
             // Find the closest parent tab-pane to determine which tab the button was clicked in
             $tab = $tab || $('.tab-pane.active');
 
-            
+
             $orderItems = $tab.find('.orderItems');
-            
+
             let total = 0;
             $orderItems.find('.item-total').each(function () {
-                const itemTotal = parseFloat($(this).val().replace('$', '')) || 0;
+                const itemTotal = parseFloat($(this).val().replace(/,/g, '').replace('vnđ', '')) || 0;
                 total += itemTotal;
             });
-            $('.orderTotal').text(total.toFixed(2));                // Display in UI
+            $('.orderTotal').text(total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' vnđ');                // Display in UI
         }
 
         // 🔧 FUNCTION: Fix array indices after item removal for proper model binding
@@ -281,16 +291,15 @@
         // 🔧 FUNCTION: Disbale Table ID if Type of Order is not 2
         function toggleTableDropdown($tab) {
             var type = parseInt($tab.find('#TypeOfOrder').val(), 10);
-            console.log('TypeOfOrder:', type); // Debugging log
             // Disable TableId if TypeOfOrder is not 2
-            if (type != 2 ) {
+            if (type != 2) {
                 $tab.find('#TableId').prop('disabled', true).val('');
             } else {
                 $tab.find('#TableId').prop('disabled', false);
             }
         }
 
-        $(document).on('change','.TypeOfOrder', function() {
+        $(document).on('change', '.TypeOfOrder', function () {
             var $tab = $(this).closest('.tab-pane');
             toggleTableDropdown($tab);
         });
@@ -329,7 +338,7 @@
                     var $tab = $('#orderTabContent .tab-pane:last');
                     toggleTableDropdown($tab);
 
-                });    
+                });
                 orderIndex++;         //  Increment for next order
             });
 
@@ -343,7 +352,7 @@
                 $('#orderTab-' + index).remove();
 
                 // 🎯 If removed tab was active, activate first remaining tab
-                if ($('#orderTabs li .nav-link.active').length === 0  && $('#orderTabs li').length > 0) {
+                if ($('#orderTabs li .nav-link.active').length === 0 && $('#orderTabs li').length > 0) {
                     $('#orderTabs li:last-child a').tab('show');
                 }
             });
@@ -375,22 +384,16 @@
                 data: $form.serialize(),
                 success: function (result) {
                     @* alert($form.data('success-message') || 'Order created successfully!'); *@
-                    if (result.success) {
+                                if (result.success) {
                         alert(result.message);
                         // Optionally redirect or update UI
                     } else {
                         alert(result.message);
                         if (result.errors) {
-                            console.log('Validation errors:', result.errors);
                         }
                     }
                 },
                 error: function (jqXHR, textStatus, errorThrown) {
-                       console.log('AJAX error details:');
-                    console.log('Status:', textStatus);
-                    console.log('Error Thrown:', errorThrown);
-                    console.log('Response Text:', jqXHR.responseText);
-
                     alert($form.data('error-message') || 'An error occurred while creating the order.');
                 }
             });

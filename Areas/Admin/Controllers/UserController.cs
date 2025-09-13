@@ -42,7 +42,6 @@ namespace TraNgheCore.Areas.Admin.Controllers
 
         /// <summary>
         /// Private field for caching the Identity UserManager instance
-        /// Improves performance by avoiding repeated OWIN context calls
         /// </summary>
         private readonly UserManager<IdentityModel> UserManager;
 
@@ -154,8 +153,8 @@ namespace TraNgheCore.Areas.Admin.Controllers
                     // Step 4: Success notification for admin
                     TempData["Success"] = "User created successfully.";
 
-                    // Step 5: Redirect using PRG pattern
-                    // Prevents form resubmission on browser refresh
+                    // Step 5: Redirect to user creation page for next entry
+                    // This allows admin to create multiple users in one session
                     return RedirectToAction("Create");
                 }
 
@@ -202,7 +201,7 @@ namespace TraNgheCore.Areas.Admin.Controllers
             {
                 // ⚠️ INPUT VALIDATION: Ensure all fields are provided
                 if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(email) ||
-                    string.IsNullOrWhiteSpace(userName) || role.Any())
+                    string.IsNullOrWhiteSpace(userName) || role.Count != 0)
                 {
                     return Json(new { success = false, message = "All fields are required." });
                 }

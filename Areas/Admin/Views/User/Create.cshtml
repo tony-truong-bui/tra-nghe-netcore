@@ -7,15 +7,24 @@
 }
 
 
-<h2>Create User Account</h2>
-@foreach (var r in AllRoles)
-{
-    <h2>@r</h2>
-}
+<h2>Create New Account</h2>
+
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success">@TempData["Success"]</div>
+    @* <div class="alert alert-success">@TempData["Success"]</div> *@
+    // Display success message if TempData contains a success message
+    <div class="alert alert-success alert-dismissible fade show" role="alert">@TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    //Javascript pop-up
+    @* @if (TempData["Success"] != null)
+    {
+        <script>
+            alert('@TempData["Success"]');
+        </script>
+    } *@
 }
 
 @using (Html.BeginForm())
@@ -48,16 +57,17 @@
                 {
                     <div class="checkbox-item" data-role="@role">
                         <label>
-                            <input type="checkbox" name="CreateUser.Role" value="@(role as string)" @(Model.CreateUser.Role != null && Model.CreateUser.Role.Contains(role) ? "checked" : "") onchange="updateSelection()" />
+                            <input type="checkbox" name="CreateUser.Role" value="@(role as string)" @(Model.CreateUser.Role !=
+                                                                                                                            null && Model.CreateUser.Role.Contains(role) ? "checked" : "") onchange="updateSelection()" />
 
-                            <span class="checkmark"></span>
-                            <div class="role-info">
-                                <span class="role-name">@(role as string)</span>
-                            </div>
-                        </label>
+                    <span class="checkmark"></span>
+                    <div class="role-info">
+                        <span class="role-name">@(role as string)</span>
                     </div>
-                    @*@Html.ValidationMessageFor(m => m.CreateUser.Role)*@
-                }
+                </label>
+            </div>
+            @*@Html.ValidationMessageFor(m => m.CreateUser.Role)*@
+                        }
             </div>
         </div>
     </div>
@@ -109,7 +119,9 @@
                                 {
                                     <div class="checkbox-item" data-role="@role">
                                         <label>
-                                            <input type="checkbox" name="CreateUser.Role" value="@(role as string)" @(user.Roles.Contains(role as string) ? "checked" : "") onchange="updateSelection()" />
+                                            <input type="checkbox" name="CreateUser.Role" value="@(role as string)"
+                                                @(user.Roles.Contains(role as string) ? "checked" : "")
+                                                onchange="updateSelection()" />
                                             <span class="checkmark"></span>
                                             <div class="role-info">
                                                 <span class="role-name">@(role as string)</span>
@@ -243,7 +255,7 @@
             });
         });
 
-        
+
     </script>
 
 }

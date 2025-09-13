@@ -1,6 +1,7 @@
 ﻿@{
     Layout = "_Layout";
     ViewBag.Title = "Login";
+    ViewData["Title"] = "Login";
 }
 
 <h1 class="text-center">Please sign in</h1>
@@ -9,7 +10,7 @@
     Creates a POST form that submits to AccountController.Login action
     Html.BeginForm() generates proper <form> tags with routing
 *@
-@using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form-horizontal w-50 mx-auto" }))
+@using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form-horizontal w-25 mx-auto" }))
 {
     @*
         CSRF Protection Token
@@ -42,6 +43,8 @@
         @* Note: Html.Password() automatically creates input type="password" *@
     </div>
 </div>
+
+<div class="g-recaptcha mt-3" data-sitekey="@ViewBag.ReCaptchaSiteKey"></div>
 <button type="submit" class="btn btn-primary w-100 py-2 mt-3"><span class="fs-5">Login</span></button>
 }
 
@@ -63,4 +66,29 @@
             <div>So sorry!!</div>
         }
     </div>
+}
+
+
+@section Scripts {
+    @* 
+        Include reCAPTCHA script
+        This is required for the reCAPTCHA widget to function
+        The sitekey is passed from the controller via ViewBag
+    *@
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+    @* 
+        Custom script to handle form submission and reCAPTCHA validation
+        Ensures reCAPTCHA is validated before form submission
+    *@
+    <script>
+        $(document).ready(function () {
+            $('form').submit(function (e) {
+                if (grecaptcha.getResponse() == '') {
+                    e.preventDefault();
+                    alert('Please complete the reCAPTCHA');
+                }
+            });
+        });
+    </script>
 }

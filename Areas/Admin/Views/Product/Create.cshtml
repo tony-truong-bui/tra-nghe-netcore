@@ -11,7 +11,7 @@
 <h2>Add new product</h2>
 
 @*Begin a form that posts to the current action (by default, POST to Product/Create)*@
-@using (Html.BeginForm(null,null,FormMethod.Post, new {enctype ="multipart/form-data"}))
+@using (Html.BeginForm())
 {
     // Adds an anti-forgery token for CSRF protection
     @Html.AntiForgeryToken()
@@ -155,7 +155,7 @@
                     </td>
 
                     <td>
-                        <button class="btn btn-success btn-sm update-produc"
+                        <button class="btn btn-success btn-sm update-product"
                                 data-id="@product.Id"
                                 type="button">
                             Update
@@ -213,14 +213,15 @@ else
     <script>
         $(function () {
             $('.update-product').click(function () {
-                var id = $(this).data('id');
+                var button = $(this);
+                var id = button.data('id');
                 var name = $('#name-input-' + id).val();
                 var description = $('#description-input-' + id).val();
-                var price = int.Parse($('#price-input-' + id).val());
+                var price = parseInt($('#price-input-' + id).val());
                 var isServed = $('#isserved-input-' + id).is(':checked');
                 var category = $('#category-input-' + id).val();
 
-                if (trim(name) === "" || trim(description) === "" || isNaN(price)) {
+                if (name.trim() === "" || description.trim() === "" || isNaN(price)) {
                     alert('Please fill in all fields correctly.');
                     return;
                 }
@@ -240,11 +241,12 @@ else
                         if (result.success) {
                             alert('Product updated successfully.');
                             // Optionally, you can update the UI with the new values
-                            $('.product-row-' + id + ' td:nth-child(1)').text(name);
+                            @* $('.product-row-' + id + ' td:nth-child(1)').text(name);
                             $('.product-row-' + id + ' td:nth-child(2)').text(description);
                             $('.product-row-' + id + ' td:nth-child(3)').text(price);
                             $('.product-row-' + id + ' td:nth-child(4) select').val(category);
-                            $('.product-row-' + id + ' td:nth-child(5)').text(isServed ? "Yes" : "No");
+                            $('.product-row-' + id + ' td:nth-child(5)').text(isServed ? "Yes" : "No"); *@
+                            alert('Product updated successfully.');
                         } else {
                             alert('Error updating product: ' + result.message);
                         }
@@ -254,7 +256,6 @@ else
                     }
                 });
 
-                alert('Update functionality for product ID ' + id + ' is not implemented yet.');
             });
 
         });

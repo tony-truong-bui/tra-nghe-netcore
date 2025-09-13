@@ -2,9 +2,18 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using TraNgheCore;
 using TraNgheCore.Models;
+using DotNetEnv;
 
+// Load .env variables BEFORE accessing configuration
+Env.Load();
 
 var builder = WebApplication.CreateBuilder(args);
+
+var testKey = builder.Configuration["ReCaptcha:SiteKey"];
+Console.WriteLine("ReCaptcha SiteKey loaded? " + (string.IsNullOrEmpty(testKey) ? "NO" : "YES"));
+
+// Bind to strongly typed settings
+builder.Services.Configure<ReCaptchaSettings>(builder.Configuration.GetSection("ReCaptcha"));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -15,9 +24,17 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<IdentityModel, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
+//Configure Cookie Expiration
+//sets the cookie expiration time to 15 minutes and enables sliding expiration
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(15);
+    options.SlidingExpiration = true;   //refresh timeout on activity
+});
+
 var app = builder.Build();
 
-//•	Ensures the database is created and up-to-date with your EF Core models.
+//ï¿½	Ensures the database is created and up-to-date with your EF Core models.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();

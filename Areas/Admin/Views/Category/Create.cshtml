@@ -60,25 +60,21 @@
                     </td>
                     <td>
                         @*@Html.ActionLink("Edit", "Edit", new { id = category.Id }) |*@
-                        <button class="btn btn-success btn-sm update-category"
-                                data-id="@category.Id"
-                                type="button">
+                        <button class="btn btn-success btn-sm update-category" data-id="@category.Id" type="button">
                             Update
                         </button>
-                         |
-                       
+                        |
+
                         @*@Html.ActionLink("Delete", "Delete", new { id = category.Id }, new { onclick = "return confirm('Are you sure you want to delete this category?');" })*@
 
-                        <button class="btn btn-danger btn-sm delete-category"
-                                data-id="@category.Id"
-                                type="button">
+                        <button class="btn btn-danger btn-sm delete-category" data-id="@category.Id" type="button">
                             Delete
                         </button>
                     </td>
                 </tr>
             }
         </tbody>
-        
+
     </table>
 }
 else
@@ -91,66 +87,65 @@ else
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-$(function() {
-    $('.delete-category').click(function () {
-        var button = $(this);
-        var id = button.data('id');
-        if (confirm('Are you sure you want to delete this category?')) {
-            $.ajax({
-                url: '@Url.Action("AjaxDelete", "Category")', // The server endpoint for deletion
-                type: 'POST',   // Data sent to the server (category ID)
-                data: { id: id }, // Ensure the ID is sent correctly
+        $(function () {
+            $('.delete-category').click(function () {
+                var button = $(this);
+                var id = button.data('id');
+                if (confirm('Are you sure you want to delete this category?')) {
+                    $.ajax({
+                        url: '@Url.Action("AjaxDelete", "Category")', // The server endpoint for deletion
+                        type: 'POST',   // Data sent to the server (category ID)
+                        data: { id: id }, // Ensure the ID is sent correctly
 
-                // If the server responds with success, remove the row from the table
-                success: function (response) {
-                    if (response.success) {
-                        $('#category-row-' + id).fadeOut(300, function() { $(this).remove(); });
-                    } else {
-                        alert(response.message || 'Delete failed.');
-                    }   
-                },
+                        // If the server responds with success, remove the row from the table
+                        success: function (response) {
+                            if (response.success) {
+                                $('#category-row-' + id).fadeOut(300, function () { $(this).remove(); });
+                            } else {
+                                alert(response.message || 'Delete failed.');
+                            }
+                        },
 
-                // If the AJAX request itself fails, show a generic error
-                error: function () {
-                    alert('An error occurred while deleting.');
+                        // If the AJAX request itself fails, show a generic error
+                        error: function () {
+                            alert('An error occurred while deleting.');
+                        }
+                    });
                 }
             });
-        }
-    });
-});
+        });
     </script>
 
     <script>
-$(function() {
-    $('.update-category').click(function () {
-        var button = $(this);
-        var id = button.data('id');
-        var name = $('#name-input-' + id).val();
-        if (name.trim() === "") {
-            alert("Category name cannot be empty.");
-            return;
-        }
-        $.ajax({
-            url: '@Url.Action("AjaxUpdate", "Category")',
-            type: 'POST',
-            data: { id: id, name: name },
-            success: function (response) {
-                if (response.success) {
-                    alert('Category updated successfully.');
-                } else {
-                    alert(response.message || 'Update failed.');
+        $(function () {
+            $('.update-category').click(function () {
+                var button = $(this);
+                var id = button.data('id');
+                var name = $('#name-input-' + id).val();
+                if (name.trim() === "") {
+                    alert("Category name cannot be empty.");
+                    return;
                 }
-            },
-            error: function () {
-                alert('An error occurred while updating.');
-            }
+                $.ajax({
+                    url: '@Url.Action("AjaxUpdate", "Category")',
+                    type: 'POST',
+                    data: { id: id, name: name },
+                    success: function (response) {
+                        if (response.success) {
+                            alert('Category updated successfully.');
+                        } else {
+                            alert(response.message || 'Update failed.');
+                        }
+                    },
+                    error: function () {
+                        alert('An error occurred while updating.');
+                    }
+                });
+            });
         });
-    });
-});
     </script>
 
 
 
 
 }
-
