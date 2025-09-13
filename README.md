@@ -80,7 +80,7 @@ Navigate to: `https://localhost:5119`
 
 ---
 
-## Some demo
+## Some demos
 
 ### Sign in
 ![Sign-in Screen](./wwwroot/images/image.png)
