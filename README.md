@@ -3,6 +3,12 @@
 An ASP.NET Core MVC application with Areas (`Admin`, `User`) using Entity Framework Core + ASP.NET Identity for role‑based access (Admin vs User). It manages products, categories, tables, orders (with order items + statuses + type of order), and users. Includes AJAX order detail modal, dynamic order creation form, currency formatting, Select2 integration, and Google reCAPTCHA support.
 
 ---
+## Scope:
+
+- The application is inspired from FnB applications used in several service businesses such as: boba tea shop, fast-food restaurants, etc.
+- The application is only for personal coding practicing purpose. I'll probably expand its scope (e.g. reports, UI enhancements,...) in the future to learn more about .NET MVC.
+
+---
 ## ✨ Features
 - Role-based access.
 - User management: create users, assign roles.
@@ -39,7 +45,7 @@ Views/Shared/_Layout.cshtml
 wwwroot/ (css, js, images, libs)
 IdentitySeeder.cs
 Program.cs
-Migrations/
+
 
 
 ---
@@ -74,6 +80,34 @@ Navigate to: `https://localhost:5119`
 
 ---
 
-## Notes:
+## Some demo
 
-This application is only for personal coding practicing purpose. 
+### Sign in
+![Sign-in Screen](./wwwroot/images/image.png)
+
+### Admin View
+
+#### Product Management
+![Product Management](./wwwroot/images/image-1.png)
+
+#### Category Management
+![Category Management](./wwwroot/images/image-2.png)
+
+#### Table Management
+![Table Management](./wwwroot/images/image-3.png)
+
+#### Type of Order
+![Type of Order](./wwwroot/images/image-4.png)
+
+#### User Management
+![User Management](./wwwroot/images/image-5.png)
+
+### Usual User View
+
+#### Order Creation
+![Order Creation](./wwwroot/images/image-7.png)
+
+#### Order Management
+![Order List](./wwwroot/images/image-8.png)
+
+
