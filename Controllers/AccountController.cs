@@ -69,7 +69,7 @@ namespace TraNgheCore.Controllers
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             //Captcha verification
-           
+            // const string SecretKey = "6Lft420rAAAAANYpbR4eVrgj6ngppwA4jGAQOLDo"; // Your reCAPTCHA secret key
             ViewBag.ReCaptchaSiteKey = _captcha.SiteKey;
             // Get the reCAPTCHA response token from the submitted form
             var captchaResponse = Request.Form["g-recaptcha-response"];
